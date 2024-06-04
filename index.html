@@ -26,6 +26,10 @@
 					<input type="checkbox" id="flat-toggle">
 					<label for="flat-toggle">Flat style</label>
 				</div>
+				<div>
+					<input type="checkbox" id="y-toggle">
+					<label for="y-toggle">Y-style gluons</label>
+				</div>
 			</section>
 			<section>
 				<p class="label">Current particles:</p>
@@ -379,6 +383,10 @@ const flatToggle = document.getElementById("flat-toggle");
 flatToggle.addEventListener("click", function() {
 	draw();
 });
+const yToggle = document.getElementById("y-toggle");
+yToggle.addEventListener("click", function() {
+	draw();
+});
 function draw() {
 	// Before we do anything, save index of currently selected quark
 	const selectedQuarkIndex = getIndexOfCurrentQuark();
@@ -387,6 +395,7 @@ function draw() {
 		quarkList.firstElementChild.remove();
 
 	let flat = flatToggle.checked;
+	let yModel = yToggle.checked;
 
 	// Draw background
 	let finalSVG = `
@@ -416,7 +425,14 @@ function draw() {
 		if(L <= 2 && i >= L - 1) break;
 
 		const [x, y] = getPositionInCircle(L, i, innerRadius, [centerX, centerY]);
-		const [x2, y2] = getPositionInCircle(L, (i+1)%L, innerRadius, [centerX, centerY]);
+
+		// Start with gluons aimed at the center, in the "Y model" for gluons
+		let [x2, y2] = [centerX, centerY];
+		// If we're not using Y model, or if there's only 2 quarks,
+		// then draw gluons from one quark to the next
+		if(!yModel || L <= 2) {
+			[x2, y2] = getPositionInCircle(L, (i+1)%L, innerRadius, [centerX, centerY]);
+		}
 
 		const wavyPath = createWavyPath(`M${x} ${y}L${x2} ${y2}`,
 			Math.floor(20/(L/3)), /* Step length: it's 20, but decreased as L increases */
