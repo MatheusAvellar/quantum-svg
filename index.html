@@ -285,22 +285,27 @@ function updateQuarks(input) {
 function drawQuark(x, y, letter, color, matter, flat=true) {
 	// FIXME: Magic numbers for overline positioning
 	const antiquark = matter.startsWith("anti")
-		? `\n\t\t\t<rect x="${x - (25/2)}" y="${y - 40}" width="25" height="5" fill="#000"/>`
+		? `\n\t\t\t<rect data-name="Overline" x="${x - (25/2)}" y="${y - 40}" width="25" height="5" fill="#000"/>`
 		: "";
-	let stroke = "";
-	if(flat) {
-		stroke = ` stroke="#000"`;
-	}
 
 	const r2 = quarkRadius/2;
-	const x2 = round(x+r2);
-	const y2 = round(y-r2);
+	const r25 = quarkRadius/2.5;
+	const x2 = round(x+r25);
+	const y2 = round(y-r25);
+
+	let stroke = "";
+	let gradient = "";
+	if(flat) {
+		stroke = ` stroke="#000"`;
+	} else {
+		gradient = `<circle cx="${x}" cy="${y}" r="${quarkRadius}" fill="url(#shade)"/>
+			<circle cx="${x2}" cy="${y2}" r="${r2}" fill="url(#specular)"/>
+			`;
+	}
 	return `
 		<g data-name="${letter}-${color}-${matter}">
 			<circle cx="${x}" cy="${y}" r="${quarkRadius}" fill="${COLORS[color]}"${stroke}/>
-			<circle cx="${x}" cy="${y}" r="${quarkRadius}" fill="url(#shade)"/>
-			<circle cx="${x2}" cy="${y2}" r="${r2}" fill="url(#specular)" transform="skewX(10)" transform-origin="${x} ${y}"/>
-			<text x="${x}" y="${y}">${letter}</text>${antiquark}
+			${gradient}<text x="${x}" y="${y}">${letter}</text>${antiquark}
 		</g>`;
 }
 
@@ -426,8 +431,7 @@ function draw() {
 	<g data-name="Quarks"
 		font-family="DejaVu Sans,sans-serif"
 		font-size="65"
-		text-anchor="middle"
-		dominant-baseline="middle">`;
+		text-anchor="middle">`;
 	for(let i = 0, L = quarks.length; i < L; i++) {
 		const quark = quarks[i];
 		// Create quark preview, add to list
@@ -440,6 +444,11 @@ function draw() {
 
 	// Output SVG
 	svg.innerHTML = finalSVG;
+	[...svg.querySelectorAll("text")].forEach(t => {
+		// Wikimedia Commons can't handle `dominant-baseline="middle"`
+		// so we have to vertically align the text manually afterwards
+		t.setAttribute("y", round(Number(t.getAttribute("y")) + t.getBBox().height/4));
+	});
 
 	if(selectedQuarkIndex >= 0) {
 		// Reselect previously selected quark, as it's changed from the redraw
@@ -486,7 +495,8 @@ function download(filename, text) {
 	text = text
 		.replaceAll("></path>", "/>")
 		.replaceAll("></circle>", "/>")
-		.replaceAll("></stop>", "/>");
+		.replaceAll("></stop>", "/>")
+		.replaceAll(`id="svg-result" `, "");
 	element.setAttribute("href", "data:image/svg+xml;charset=utf-8," + encodeURIComponent(text));
 	element.setAttribute("download", filename);
 	element.style.display = "none";
