@@ -1,0 +1,223 @@
+* {
+	box-sizing: border-box;
+}
+body {
+	font-family: Inter, Roboto, Arial, sans-serif;
+
+	--bg-color-checked: #efefef;
+	--bg-color-hover: #f1f1f1;
+	--bg-color-active: #ddd;
+}
+[data-color="grey"],
+[for="grey-quark"]      { --accent: #bbb; }
+[data-color="red"],
+[for="red-quark"]       { --accent: #ff7a7a; }
+[data-color="green"],
+[for="green-quark"]     { --accent: #77e497; }
+[data-color="blue"],
+[for="blue-quark"]      { --accent: #5ab3ff; }
+[data-color="antired"],
+[for="antired-quark"]   { --accent: #6ee5dd; }
+[data-color="antigreen"],
+[for="antigreen-quark"] { --accent: #ff89f1; }
+[data-color="antiblue"],
+[for="antiblue-quark"]  { --accent: #ffdf64; }
+
+header, main, footer {
+	margin: auto;
+	max-width: 1200px;
+}
+svg {
+	border: 1px solid #ccc;
+	display: block;
+	margin: auto;
+}
+
+.output-config {
+	display: flex;
+	gap: 3rem;
+}
+
+.radio-toolbar {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: .5rem;
+	min-width: 475px;
+	max-width: 1000px;
+	margin-bottom: 1rem;
+	padding-bottom: 1rem;
+	border-bottom: 1px solid #ddd;
+}
+.radio-toolbar > div {
+	display: inline-flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.radio-toolbar input[type="radio"] {
+	opacity: 0;
+	display: inline-block;
+	width: 0;
+	height: 0;
+	margin: 0;
+}
+.radio-toolbar label {
+	cursor: pointer;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	padding: .5rem;
+	border-radius: 3px;
+}
+.radio-toolbar label:hover {
+	background-color: var(--bg-color-hover);
+}
+.radio-toolbar label:active {
+	background-color: var(--bg-color-active);
+}
+.radio-toolbar label:has(:checked) {
+	background-color: var(--bg-color-checked);
+}
+.radio-toolbar span[title] {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 2.75rem;
+	height: 2.75rem;
+	padding: 0.1rem;
+	background-clip: content-box;
+	font-size: 1.25rem;
+	border-radius: 100%;
+	border: .2rem solid transparent;
+}
+.radio-toolbar .long-label {
+	font-size: .85rem;
+	text-align: center;
+}
+.radio-toolbar input[type="radio"] + span[title] {
+	background-color: var(--accent, #bbb);
+}
+.radio-toolbar input[type="radio"]:checked + span[title] {
+	background-color: var(--accent, #bbb);
+	border-color: var(--accent, #bbb);
+}
+
+#quark-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+#quark-list li {
+	position: relative;
+}
+#quark-list li input[type="radio"] {
+	margin: 0;
+	position: absolute;
+	opacity: 0;
+	display: inline-block;
+	width: 0;
+	height: 0;
+}
+#quark-list li label {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	width: 100%;
+	padding: .5rem;
+	border-radius: 3px;
+}
+#quark-list li label:hover {
+	background-color: var(--bg-color-hover);
+}
+#quark-list li label:active {
+	background-color: var(--bg-color-active);
+}
+#quark-list li input[type="radio"]:checked + label {
+	background-color: var(--bg-color-checked);
+}
+#quark-list .quark-preview {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	padding: .1rem;
+	margin-right: .5rem;
+	border-radius: 100%;
+	font-size: .85rem;
+	line-height: 1;
+	background-color: var(--accent, #bbb);
+}
+#quark-list li button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: 0;
+	right: -.5rem;
+	border: 0;
+	border-radius: 100%;
+	width: 1rem;
+	aspect-ratio: 1;
+	background-color: #ddd;
+	font: inherit;
+	font-size: .75rem;
+	line-height: 1;
+	visibility: collapse;
+}
+#quark-list li:not(:nth-of-type(1), :nth-of-type(2)):hover button {
+	visibility: visible;
+}
+#quark-list li button:active {
+	background-color: #ff6363;
+	color: #fff;
+}
+#quark-list .add-quark-btn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: .5rem;
+	cursor: pointer;
+	font: inherit;
+	padding: .5rem;
+	border: 0;
+	border-radius: 3px;
+	background-color: #e1e9ff;
+}
+#quark-list .add-quark-btn:hover {
+	background-color: #d4dfff;
+}
+#quark-list .add-quark-btn:active {
+	background-color: #c1d1ff;
+}
+#quark-list .add-quark-btn span:first-of-type {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	font-weight: 700;
+	background-color: #fff;
+	border-radius: 100%;
+}
+
+@media screen and (max-width: 700px) {
+	.radio-toolbar {
+		grid-template-columns: repeat(4, 1fr);
+	}
+}
+@media screen and (min-width: 1200px) {
+	main {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 2rem;
+	}
+}
+footer .sign {
+	text-align: right;
+	color: #777;
+}

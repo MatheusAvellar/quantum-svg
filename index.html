@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="utf-8">
+	<title>Hadron SVG Generator</title>
+	<meta content="Matheus Avellar" name="author">
+	<!-- <meta name="description" content=""> -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="preconnect" href="https://cdn.avl.la/" crossorigin>
+	<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+	<header>
+		<h1>Hadron SVG Generator</h1>
+	</header>
+	<main>
+		<section>
+			<svg id="svg-result" xmlns="http://www.w3.org/2000/svg"></svg>
+		</section>
+		<aside>
+			<section class="output-config">
+				<div>
+					<button id="save-btn">Save SVG</button>
+				</div>
+				<div>
+					<input type="checkbox" id="flat-toggle">
+					<label for="flat-toggle">Flat style</label>
+				</div>
+			</section>
+			<section>
+				<p class="label">Current particles:</p>
+				<ul id="quark-list"></ul>
+			</section>
+			<section id="edit-properties">
+				<p class="label">Select quark properties:</p>
+				<section class="radio-toolbar">
+					<label for="q-quark">
+						<input id="q-quark" value="q" type="radio" name="quark-type" checked/>
+						<span title="Unspecified">q</span>
+						<span class="long-label">Unspecified</span>
+					</label>
+					<label for="u-quark">
+						<input id="u-quark" value="u" type="radio" name="quark-type"/>
+						<span title="Up">u</span>
+						<span class="long-label">Up</span>
+					</label>
+					<label for="d-quark">
+						<input id="d-quark" value="d" type="radio" name="quark-type"/>
+						<span title="Down">d</span>
+						<span class="long-label">Down</span>
+					</label>
+					<label for="c-quark">
+						<input id="c-quark" value="c" type="radio" name="quark-type"/>
+						<span title="Charm">c</span>
+						<span class="long-label">Charm</span>
+					</label>
+					<label for="s-quark">
+						<input id="s-quark" value="s" type="radio" name="quark-type"/>
+						<span title="Strange">s</span>
+						<span class="long-label">Strange</span>
+					</label>
+					<label for="t-quark">
+						<input id="t-quark" value="t" type="radio" name="quark-type"/>
+						<span title="Top">t</span>
+						<span class="long-label">Top</span>
+					</label>
+					<label for="b-quark">
+						<input id="b-quark" value="b" type="radio" name="quark-type"/>
+						<span title="Bottom">b</span>
+						<span class="long-label">Bottom</span>
+					</label>
+				</section>
+				<section class="radio-toolbar">
+					<label for="grey-quark">
+						<input id="grey-quark" value="grey" type="radio" name="quark-color" checked/>
+						<span title="Grey">q</span>
+						<span class="long-label">Grey</span>
+					</label>
+					<label for="red-quark">
+						<input id="red-quark" value="red" type="radio" name="quark-color"/>
+						<span title="Grey">q</span>
+						<span class="long-label">Red</span>
+					</label>
+					<label for="green-quark">
+						<input id="green-quark" value="green" type="radio" name="quark-color"/>
+						<span title="Green">q</span>
+						<span class="long-label">Green</span>
+					</label>
+					<label for="blue-quark">
+						<input id="blue-quark" value="blue" type="radio" name="quark-color"/>
+						<span title="Blue">q</span>
+						<span class="long-label">Blue</span>
+					</label>
+					<label for="antired-quark">
+						<input id="antired-quark" value="antired" type="radio" name="quark-color"/>
+						<span title="Anti-Red">q</span>
+						<span class="long-label">Anti-Red</span>
+					</label>
+					<label for="antigreen-quark">
+						<input id="antigreen-quark" value="antigreen" type="radio" name="quark-color"/>
+						<span title="Anti-Green">q</span>
+						<span class="long-label">Anti-Green</span>
+					</label>
+					<label for="antiblue-quark">
+						<input id="antiblue-quark" value="antiblue" type="radio" name="quark-color"/>
+						<span title="Anti-Blue">q</span>
+						<span class="long-label">Anti-Blue</span>
+					</label>
+				</section>
+				<section class="radio-toolbar">
+					<label for="quark-quark">
+						<input id="quark-quark" value="quark" type="radio" name="quark-matter" checked/>
+						<span title="Quark">q</span>
+						<span class="long-label">Quark</span>
+					</label>
+					<label for="antiquark-quark">
+						<input id="antiquark-quark" value="antiquark" type="radio" name="quark-matter"/>
+						<span title="Antiquark" >q̅</span>
+						<span class="long-label">Antiquark</span>
+					</label>
+				</section>
+			</section>
+		</aside>
+<script>
+function round(v) {
+	return Math.round(v*100)/100;
+}
+function toRadians(angle) {
+	return angle * (Math.PI / 180);
+}
+function getPositionInCircle(divisions, position, radius=1, startPos=[0, 0]) {
+	const angle = position * (360/divisions);
+	const rad = toRadians(angle);
+	const x = radius * Math.cos(rad) + startPos[0];
+	const y = radius * Math.sin(rad) + startPos[1];
+	return [ round(x), round(y) ];
+}
+
+// [Ref] https://stackoverflow.com/a/77735448/4824627
+// Code by Eric Rovell
+// TODO: In relative mode, this is just a repeating pattern, AFAIK
+function createWavyPath(path, stepLength, amplitude) {
+	const referencePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+	referencePath.setAttribute("d", path);
+	const pathLength = referencePath.getTotalLength();
+	const stepCount = Math.round(pathLength / stepLength);
+	let pos = referencePath.getPointAtLength(0);
+	const resultPath = [ `M${round(pos.x)},${round(pos.y)}` ];
+	let orientation = -1;
+
+	for(let i = 1; i <= stepCount; i++) {
+		const last = pos;
+		pos = referencePath.getPointAtLength(i * pathLength / stepCount);
+		// Find a point halfway between last and pos. Then find the point that is
+		// perpendicular to that line segment, and is squiggleAmplitude away from
+		// it on the side of the line designated by 'orientation' (-1 or +1).
+		// This point will be the control point of the quadratic curve forming the
+		// squiggle stepLength.
+		// The vector from the last point to this one
+		const vector = {
+			x: pos.x - last.x,
+			y: pos.y - last.y
+		};
+		const vectorLength = Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+		const mid = {
+			x: last.x + vector.x / 2,
+			y: last.y + vector.y / 2
+		};
+		const normalVector = {
+			x: -amplitude * vector.y / vectorLength,
+			y: amplitude * vector.x / vectorLength
+		};
+		const controlPoint = {
+			x: mid.x + normalVector.x * orientation,
+			y: mid.y + normalVector.y * orientation
+		};
+		resultPath.push(`Q`
+			+ `${round(controlPoint.x)},`
+			+ `${round(controlPoint.y)},`
+			+ `${round(pos.x)},`
+			+ `${round(pos.y)}`);
+		orientation *= -1;
+	}
+	return resultPath.join("");
+}
+
+function createQuarkPreview(obj) {
+	const li = document.createElement("li");
+
+	const radio = document.createElement("input");
+	radio.type = "radio";
+	radio.name = "current-quarks";
+	radio.id = `obj${obj.id}`;
+	radio.value = obj.id;
+	radio.addEventListener("click", () => { updateEditPanel(obj); });
+	li.appendChild(radio);
+
+	const label = document.createElement("label");
+	label.setAttribute("for", radio.id);
+	li.appendChild(label);
+
+	const viz = document.createElement("div");
+	viz.className = "quark-preview";
+	let previzName = obj.type;
+	viz.dataset.color = obj.color;
+	if(obj.matter.startsWith("anti")) {
+		viz.dataset.antimatter = true;
+		// [Ref] https://util.unicode.org/UnicodeJsps/character.jsp?a=0305
+		// U+0305 COMBINING OVERLINE
+		previzName += "\u0305";
+	}
+	viz.innerText = previzName;
+	label.appendChild(viz);
+
+	const span = document.createElement("span");
+	span.innerText = `${TYPES[obj.type] || "Unknown"} ${obj.matter || "matter"}`;
+	label.appendChild(span);
+
+	const remove = document.createElement("button");
+	remove.className = "remove-quark-btn";
+	remove.innerText = "×";
+	remove.addEventListener("click", function() {
+		// Find in array with same ID
+		const index = quarks.findIndex(e => e.id == obj.id);
+		// Remove from array
+		quarks.splice(index, 1);
+		draw();
+	});
+	li.appendChild(remove);
+
+	return li;
+}
+
+function updateEditPanel(obj) {
+	const checked = [...editPanel.querySelectorAll("input[type='radio']:checked")];
+	checked.forEach(e => { e.checked = false; });
+	const radioQType = editPanel.querySelector(`#${obj.type}-quark`);
+	radioQType.checked = true;
+
+	const radioQColor = editPanel.querySelector(`#${obj.color}-quark`);
+	radioQColor.checked = true;
+
+	const radioQMatter = editPanel.querySelector(`#${obj.matter}-quark`);
+	radioQMatter.checked = true;
+}
+
+function getIndexOfCurrentQuark() {
+	// Find selected quark in list
+	const quarkSelection = quarkList.querySelector(":checked");
+	// If nothing is selected, we get null; return
+	if(!quarkSelection)
+		return -1;
+
+	let index = -1;
+	for(let i = 0; i < quarks.length; i++) {
+		if(quarks[i].id == quarkSelection.value) {
+			index = i;
+			break;
+		}
+	}
+	// If we got here, there IS something selected,
+	// but its ID is NOT in the list of quarks
+	// User probably removed a quark while selected
+	if(index < 0) {
+		// Simulate selection of first quark instead
+		quarkList.firstElementChild.querySelector("input").click();
+		return 0;
+	}
+	// Otherwise, return found index
+	return index;
+}
+
+function updateQuarks(input) {
+	const index = getIndexOfCurrentQuark();
+	if(index < 0)
+		return;
+	// Input name is "quark-xxxxx"; we want "xxxxx" as that's our key
+	const key = input.name.substr(6);
+	// Update value in original quark
+	quarks[index][key] = input.value;
+	// Ask for a redraw
+	draw();
+}
+
+function drawQuark(x, y, letter, color, matter, flat=true) {
+	// FIXME: Magic numbers for overline positioning
+	const antiquark = matter.startsWith("anti")
+		? `\n\t\t\t<rect x="${x - (25/2)}" y="${y - 40}" width="25" height="5" fill="#000"/>`
+		: "";
+	let stroke = "";
+	if(flat) {
+		stroke = ` stroke="#000"`;
+	}
+
+	const r2 = quarkRadius/2;
+	const x2 = round(x+r2);
+	const y2 = round(y-r2);
+	return `
+		<g data-name="${letter}-${color}-${matter}">
+			<circle cx="${x}" cy="${y}" r="${quarkRadius}" fill="${COLORS[color]}"${stroke}/>
+			<circle cx="${x}" cy="${y}" r="${quarkRadius}" fill="url(#shade)"/>
+			<circle cx="${x2}" cy="${y2}" r="${r2}" fill="url(#specular)" transform="skewX(10)" transform-origin="${x} ${y}"/>
+			<text x="${x}" y="${y}">${letter}</text>${antiquark}
+		</g>`;
+}
+
+
+//////////////////////////////////////////////////////////////////
+
+
+const svg = document.getElementById("svg-result");
+const svgWidth = 500;
+const svgHeight = 500;
+svg.setAttribute("width", svgWidth);
+svg.setAttribute("height", svgHeight);
+
+const centerX = svgWidth / 2;
+const centerY = svgHeight / 2;
+
+const outerRadius = 240;
+const quarkRadius = 70;
+const innerRadius = outerRadius - quarkRadius - 40;
+
+const COLORS = {};
+COLORS["grey"]      = "#bbb";
+COLORS["red"]       = "#ff7a7a";
+COLORS["green"]     = "#77e497";
+COLORS["blue"]      = "#5ab3ff";
+COLORS["antired"]   = "#6ee5dd";
+COLORS["antigreen"] = "#ff89f1";
+COLORS["antiblue"]  = "#ffdf64";
+
+const quarks = [
+	{
+		id: "1",
+		type: "d",
+		color: "red",
+		matter: "quark"
+	},
+	{
+		id: "2",
+		type: "d",
+		color: "green",
+		matter: "quark"
+	},
+	{
+		id: "3",
+		type: "u",
+		color: "blue",
+		matter: "quark"
+	},
+];
+
+const TYPES = {
+	q: "Generic",
+	u: "Up",
+	d: "Down",
+	c: "Charm",
+	s: "Strange",
+	t: "Top",
+	b: "Bottom"
+};
+
+
+const editPanel = document.getElementById("edit-properties");
+[...document.querySelectorAll("[name^='quark-']")].forEach(e => {
+	e.addEventListener("click", function() {
+		updateQuarks(e);
+	});
+});
+
+const quarkList = document.getElementById("quark-list");
+const flatToggle = document.getElementById("flat-toggle");
+flatToggle.addEventListener("click", function() {
+	draw();
+});
+function draw() {
+	// Before we do anything, save index of currently selected quark
+	const selectedQuarkIndex = getIndexOfCurrentQuark();
+
+	while(quarkList.childElementCount)
+		quarkList.firstElementChild.remove();
+
+	let flat = flatToggle.checked;
+
+	// Draw background
+	let finalSVG = `
+	<circle data-name="Particle background" cx="${centerX}" cy="${centerY}" r="${outerRadius}" fill="#ccc"/>`;
+
+	// If 3D style (i.e. not flat)
+	if(!flat) {
+		// Define gradients
+		finalSVG += `
+	<defs>
+		<radialGradient data-name="Specular highlight gradient" id="specular">
+			<stop offset="0" stop-opacity="0.85" stop-color="#fff"/>
+			<stop offset="1" stop-opacity="0" stop-color="#fff"/>
+		</radialGradient>
+		<linearGradient data-name="Shade gradient" id="shade" x1="0" y1="100%" x2="100%" y2="0">
+			<stop offset="0%" stop-color="#000" stop-opacity="0.3"/>
+			<stop offset="75%" stop-color="transparent" stop-opacity="0"/>
+		</linearGradient>
+	</defs>`;
+	}
+
+	// Draw gluons
+	finalSVG += `
+	<g data-name="Gluons" stroke="#fdffbd" stroke-width="10" fill="none">`;
+	for(let i = 0, L = quarks.length; i < L; i++) {
+		// Prevent double-gluon when there's only 2 quarks
+		if(L <= 2 && i >= L - 1) break;
+
+		const [x, y] = getPositionInCircle(L, i, innerRadius, [centerX, centerY]);
+		const [x2, y2] = getPositionInCircle(L, (i+1)%L, innerRadius, [centerX, centerY]);
+
+		const wavyPath = createWavyPath(`M${x} ${y}L${x2} ${y2}`,
+			Math.floor(20/(L/3)), /* Step length: it's 20, but decreased as L increases */
+			25 /* Amplitude */
+		);
+		finalSVG += `\n\t\t<path d="${wavyPath}"/>`;
+	}
+	finalSVG += "\n\t</g>";
+
+	// Draw quarks
+	finalSVG += `
+	<g data-name="Quarks"
+		font-family="DejaVu Sans,sans-serif"
+		font-size="65"
+		text-anchor="middle"
+		dominant-baseline="middle">`;
+	for(let i = 0, L = quarks.length; i < L; i++) {
+		const quark = quarks[i];
+		// Create quark preview, add to list
+		quarkList.appendChild(createQuarkPreview(quark));
+		// Calculate position and draw quark
+		const [x, y] = getPositionInCircle(L, i, innerRadius, [centerX, centerY]);
+		finalSVG += drawQuark(x, y, quark.type, quark.color, quark.matter, flat);
+	}
+	finalSVG += "\n\t</g>\n";
+
+	// Output SVG
+	svg.innerHTML = finalSVG;
+
+	if(selectedQuarkIndex >= 0) {
+		// Reselect previously selected quark, as it's changed from the redraw
+		const newQuarkSelection = quarkList.querySelector(`#obj${quarks[selectedQuarkIndex].id}`);
+		newQuarkSelection.checked = true;
+	}
+
+	const addQuarkButton = document.createElement("button");
+	addQuarkButton.className = "add-quark-btn";
+	const plusSpan = document.createElement("span");
+	plusSpan.innerText = "+";
+	addQuarkButton.appendChild(plusSpan);
+	const labelSpan = document.createElement("span");
+	labelSpan.innerText = "Add quark";
+	addQuarkButton.appendChild(labelSpan);
+	addQuarkButton.addEventListener("click", function() {
+		// Guarantee new ID for new quark
+		let newID = -1;
+		while(true) {
+			newID = `${Math.floor(Math.random()*100_000)}`;
+			if(quarks.findIndex(e => e.id == newID) < 0)
+				break;
+		}
+		// Create a generic quark
+		quarks.push({
+			id: newID,
+			type: "q",
+			color: "grey",
+			matter: "quark"
+		});
+		draw();
+	});
+	quarkList.appendChild(addQuarkButton);
+}
+
+// Start by triggering a draw call
+draw();
+// Simulate selection of first quark
+quarkList.firstElementChild.querySelector("input").click();
+
+
+function download(filename, text) {
+	const element = document.createElement("a");
+	text = text
+		.replaceAll("></path>", "/>")
+		.replaceAll("></circle>", "/>")
+		.replaceAll("></stop>", "/>");
+	element.setAttribute("href", "data:image/svg+xml;charset=utf-8," + encodeURIComponent(text));
+	element.setAttribute("download", filename);
+	element.style.display = "none";
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
+}
+const saveBtn = document.getElementById("save-btn");
+saveBtn.addEventListener("click", function() {
+	download("quark-structure.svg", svg.outerHTML);
+});
+</script>
+	</main>
+	<footer>
+		<p class="sign">
+			Made with ♥&#xFE0E;<!--&#xFE0E;[Ref] stackoverflow.com/a/38452396/4824627-->
+			by Matheus Avellar<br>Last updated on June 2024
+		</p>
+	</footer>
+	<!-- ######### -->
+	<figure id="logo">
+		<a href="/"></a>
+		<link rel="stylesheet" href="/small-logo.css">
+	</figure>
+	<!-- ######### -->
+	<link rel="stylesheet" href="https://cdn.avl.la/font/inter.css">
+</body>
+</html>
