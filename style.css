@@ -27,15 +27,181 @@ header, main, footer {
 	margin: auto;
 	max-width: 1200px;
 }
-svg {
+
+#svg-result {
 	border: 1px solid #ccc;
 	display: block;
-	margin: auto;
+	margin: 0 auto .5rem auto;
+}
+.icon {
+	width: 24px;
+	height: 24px;
 }
 
 .output-config {
 	display: flex;
-	gap: 3rem;
+	gap: 1rem;
+}
+input[type="checkbox"] {
+	display: inline-block;
+	appearance: none;
+	opacity: 0;
+	width: 0;
+	height: 0;
+	margin: 0;
+}
+.checkbox-toggle {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: .5rem;
+	padding: .5rem;
+	border-radius: 3px;
+}
+/*
+ Inspired by Håvard Brynjulfsen's CodePen:
+ https://codepen.io/havardob/pen/BapJYMg
+*/
+.checkbox-toggle::before {
+	content: "";
+	display: block;
+	width: 1.25rem;
+	height: 1.25rem;
+	border: 2px solid #bbb;
+	background-color: #fff;
+	border-radius: 50%;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' fill='%23FFFFFF' viewBox='0 0 256 256'%3E%3Crect width='256' height='256' fill='none'%3E%3C/rect%3E%3Cpolyline points='216 72.005 104 184 48 128.005' fill='none' stroke='%23FFFFFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='32'%3E%3C/polyline%3E%3C/svg%3E");
+	background-size: 12px;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+input[type="checkbox"]:focus-visible + .checkbox-toggle {
+	outline: 2px solid #000;
+}
+.checkbox-toggle:is(:hover, :focus)::before {
+	border-color: #777;
+}
+input[type="checkbox"]:checked + .checkbox-toggle::before {
+	background-color: #10688f;
+	border-color: #10688f;
+}
+
+.interactive-section {
+	margin-top: .5rem;
+	padding: .5rem;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+}
+.interactive-section .label {
+	margin: 0;
+	margin-bottom: .5rem;
+	color: #777;
+}
+
+#quark-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+#quark-list li {
+	position: relative;
+}
+#quark-list li input[type="radio"] {
+	margin: 0;
+	position: absolute;
+	opacity: 0;
+	display: inline-block;
+	width: 0;
+	height: 0;
+}
+#quark-list li label {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	width: 100%;
+	padding: .5rem;
+	border-radius: 3px;
+}
+#quark-list li label:hover {
+	background-color: var(--bg-color-hover);
+}
+#quark-list li label:active {
+	background-color: var(--bg-color-active);
+}
+#quark-list li input[type="radio"]:focus-visible + label {
+	outline: 2px solid #000;
+}
+#quark-list li input[type="radio"]:checked + label {
+	background-color: var(--bg-color-checked);
+}
+#quark-list .quark-preview {
+	display: inline-flex;
+	justify-content: center;
+	align-items: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	padding: .1rem;
+	margin-right: .5rem;
+	border-radius: 100%;
+	font-size: .85rem;
+	line-height: 1;
+	background-color: var(--accent, #bbb);
+}
+#quark-list li .remove-quark-btn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: 0;
+	right: -.5rem;
+	border: 0;
+	border-radius: 100%;
+	width: 1rem;
+	aspect-ratio: 1;
+	background-color: #ddd;
+	font: inherit;
+	font-size: .75rem;
+	line-height: 1;
+	visibility: collapse;
+}
+#quark-list li:not(:nth-of-type(1), :nth-of-type(2)):is(:hover, :focus, :focus-within) .remove-quark-btn {
+	visibility: visible;
+}
+#quark-list li .remove-quark-btn:active {
+	background-color: #ff6363;
+	color: #fff;
+}
+#add-quark-btn, #save-btn {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: .5rem;
+	cursor: pointer;
+	font: inherit;
+	padding: .5rem;
+	border: 0;
+	border-radius: 3px;
+	background-color: #e1e9ff;
+}
+#add-quark-btn:hover, #save-btn:hover {
+	background-color: #d4dfff;
+}
+#add-quark-btn:active, #save-btn:active {
+	background-color: #c1d1ff;
+}
+#add-quark-btn span:first-of-type {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	font-weight: 700;
+	background-color: #fff;
+	border-radius: 100%;
 }
 
 .radio-toolbar {
@@ -48,6 +214,11 @@ svg {
 	padding-bottom: 1rem;
 	border-bottom: 1px solid #ddd;
 }
+.radio-toolbar:last-of-type {
+	margin-bottom: 0;
+	border-bottom: 0;
+	padding-bottom: 0;
+}
 .radio-toolbar > div {
 	display: inline-flex;
 	flex-direction: column;
@@ -55,8 +226,8 @@ svg {
 	align-items: center;
 }
 .radio-toolbar input[type="radio"] {
-	opacity: 0;
 	display: inline-block;
+	opacity: 0;
 	width: 0;
 	height: 0;
 	margin: 0;
@@ -95,114 +266,15 @@ svg {
 	font-size: .85rem;
 	text-align: center;
 }
+.radio-toolbar label:has(input[type="radio"]:focus-visible) {
+	outline: 2px solid #000;
+}
 .radio-toolbar input[type="radio"] + span[title] {
 	background-color: var(--accent, #bbb);
 }
 .radio-toolbar input[type="radio"]:checked + span[title] {
 	background-color: var(--accent, #bbb);
 	border-color: var(--accent, #bbb);
-}
-
-#quark-list {
-	display: flex;
-	flex-wrap: wrap;
-	gap: .5rem;
-	margin: 0;
-	padding: 0;
-	list-style: none;
-}
-#quark-list li {
-	position: relative;
-}
-#quark-list li input[type="radio"] {
-	margin: 0;
-	position: absolute;
-	opacity: 0;
-	display: inline-block;
-	width: 0;
-	height: 0;
-}
-#quark-list li label {
-	display: flex;
-	align-items: center;
-	cursor: pointer;
-	width: 100%;
-	padding: .5rem;
-	border-radius: 3px;
-}
-#quark-list li label:hover {
-	background-color: var(--bg-color-hover);
-}
-#quark-list li label:active {
-	background-color: var(--bg-color-active);
-}
-#quark-list li input[type="radio"]:checked + label {
-	background-color: var(--bg-color-checked);
-}
-#quark-list .quark-preview {
-	display: inline-flex;
-	justify-content: center;
-	align-items: center;
-	width: 1.5rem;
-	height: 1.5rem;
-	padding: .1rem;
-	margin-right: .5rem;
-	border-radius: 100%;
-	font-size: .85rem;
-	line-height: 1;
-	background-color: var(--accent, #bbb);
-}
-#quark-list li button {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	position: absolute;
-	top: 0;
-	right: -.5rem;
-	border: 0;
-	border-radius: 100%;
-	width: 1rem;
-	aspect-ratio: 1;
-	background-color: #ddd;
-	font: inherit;
-	font-size: .75rem;
-	line-height: 1;
-	visibility: collapse;
-}
-#quark-list li:not(:nth-of-type(1), :nth-of-type(2)):hover button {
-	visibility: visible;
-}
-#quark-list li button:active {
-	background-color: #ff6363;
-	color: #fff;
-}
-#quark-list .add-quark-btn {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: .5rem;
-	cursor: pointer;
-	font: inherit;
-	padding: .5rem;
-	border: 0;
-	border-radius: 3px;
-	background-color: #e1e9ff;
-}
-#quark-list .add-quark-btn:hover {
-	background-color: #d4dfff;
-}
-#quark-list .add-quark-btn:active {
-	background-color: #c1d1ff;
-}
-#quark-list .add-quark-btn span:first-of-type {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 1.5rem;
-	height: 1.5rem;
-	font-weight: 700;
-	background-color: #fff;
-	border-radius: 100%;
 }
 
 @media screen and (max-width: 700px) {
@@ -214,7 +286,7 @@ svg {
 	main {
 		display: grid;
 		grid-template-columns: auto 1fr;
-		gap: 2rem;
+		gap: .5rem;
 	}
 }
 footer .sign {
